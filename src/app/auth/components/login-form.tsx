@@ -115,7 +115,7 @@ export function LoginForm({
                                         </Link>
                                     </div>
                                     <Input id="password" name="mot_de_passe" type="password" required />
-                                </div>
+                                </div >
                                 <Button className="cursor-pointer w-full" type="submit" disabled={isLoading}>
                                     {isLoading ? (
                                         <>
@@ -128,18 +128,18 @@ export function LoginForm({
                                         </>
                                     )}
                                 </Button>
-                            </div>
+                            </div >
                             <div className="text-center text-sm">
                                 Tu n'es pas encore inscrit ? &nbsp;
                                 <Link href="/auth/register" className="underline underline-offset-4">
                                     Crée ton compte
                                 </Link>
                             </div>
-                        </div>
-                    </form>
-                </CardContent>
-            </Card>
+                        </div >
+                    </form >
+                </CardContent >
+            </Card >
 
-        </div>
+        </div >
     )
 }

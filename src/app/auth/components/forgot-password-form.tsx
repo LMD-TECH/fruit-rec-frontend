@@ -23,8 +23,6 @@ export function ForgotPasswordForm() {
 
     const response = await onMutate<{ error_message: string, email_infos: any, status: boolean, status_code: number }>({ endpoint: "/api/auth/forgot-password", body: { email } })
 
-    console.log(response)
-
     setIsLoading(false)
     setIsSubmitted(true)
   }
