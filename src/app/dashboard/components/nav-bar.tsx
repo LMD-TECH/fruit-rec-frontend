@@ -1,22 +1,19 @@
-"use client"
-
+"use client";
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { ChevronRight, Search, Bell, Settings, Home, LucideHome, HomeIcon, LogOut, LogOutIcon } from "lucide-react"
+import { ChevronRight, Search, Settings, Home, LogOutIcon } from "lucide-react";
 
-import { cn, fetcher } from "@/lib/utils"
+import { cn, getFirstAndLastChar } from "@/lib/utils";
 import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
-    DropdownMenuShortcut,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
     CommandDialog,
     CommandEmpty,
@@ -27,12 +24,8 @@ import {
     CommandSeparator,
 } from "@/components/ui/command"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { useQuery } from "@tanstack/react-query"
-import { useCustomQuery } from "@/context/querycontext"
 import { _User } from "@/types/user.zod"
-import { isAuthenticatedOrRedirect } from "@/services/session.action"
 import useUser from "@/hooks/use-user"
 import { deleteCookie } from "@/services/cookies.action"
 
@@ -47,12 +40,12 @@ const getBreadcrumbs = (pathname: string): BreadcrumbItem[] => {
         const href = `/${paths.slice(0, index + 1).join("/")}`
         const label = path.charAt(0).toUpperCase() + path.slice(1).replace(/-/g, " ")
         return { label, href }
-    })
+    });
 }
 
 export function Navbar() {
     const pathname = usePathname()
-    const [open, setOpen] = React.useState(false)
+    const [open, setOpen] = React.useState<boolean>(false)
     const breadcrumbs = getBreadcrumbs(pathname)
     const user = useUser()
 
@@ -60,16 +53,13 @@ export function Navbar() {
         const down = (e: KeyboardEvent) => {
             if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
                 e.preventDefault()
-                setOpen((open) => !open)
+                setOpen((open: boolean) => !open)
             }
         }
         document.addEventListener("keydown", down)
         return () => document.removeEventListener("keydown", down)
     }, [])
 
-    const getFirstAndLastChar = (user: _User|null): string => {
-        return user?.prenom[0] +""+ user?.nom_famille[0]
-    }
 
     return (
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

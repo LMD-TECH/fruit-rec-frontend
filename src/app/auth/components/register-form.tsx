@@ -23,6 +23,7 @@ import { title } from "process"
 import { useRouter } from "next/navigation"
 import { useCustomQuery } from "@/context/querycontext"
 import { createCookies } from "@/services/cookies.action"
+import { toast } from "sonner"
 
 type CreateUserResponse = {
     message: string,
@@ -43,28 +44,24 @@ export function RegisterForm({
     const [isLoading, setIsLoading] = React.useState(false)
     const fileInputRef = React.useRef<HTMLInputElement>(null)
     const formRef = React.useRef<HTMLFormElement>(null)
-    const {onMutate} = useCustomQuery()
+    const { onMutate } = useCustomQuery()
     const router = useRouter()
     const [avatarUrl, setAvatarUrl] = React.useState("/placeholder-user.jpg")
 
-    const { toast } = useToast()
+    const handleSave = async (formData: FormData) => {
 
-    const handleSave = async (data: FormData) => {
-        if(!formRef.current) return
-        const formData = new FormData(formRef.current)
-        
         setIsLoading(true)
-        const response = await onMutate<CreateUserResponse>({body: formData, contentType:"multipart/form-data", endpoint: "/api/auth/register"})
-        if(response && response.status_code === 200){
+        const response = await onMutate<CreateUserResponse>({ body: formData, contentType: "multipart/form-data", endpoint: "/api/auth/register" })
+        if (response && response.status_code === 200) {
             router.replace("/auth/login")
-            toast({
-                title: response.message,
-            });
-        }else{
-            toast({
-                // variant: "destructive",
-                title:  "Error",
-                description: response?.error
+            toast(response.message,);
+        } else {
+            toast("Une erreur s'est produite !", {
+                description: response?.error,
+                style: {
+                    backgroundColor: "red",
+                    color: "white"
+                }
             })
         }
         console.log("La reponse du server back", response)
@@ -84,7 +81,11 @@ export function RegisterForm({
     }
     return (
         <div >
-            <form action={handleSave} ref={formRef}>
+            <form onSubmit={async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                await handleSave(formData);
+            }}>
                 <Card className="py-6  ">
                     <CardHeader className="text-center">
                         <CardTitle className="text-xl">Création de ton compte</CardTitle>

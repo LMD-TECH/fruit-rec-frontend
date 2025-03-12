@@ -6,8 +6,8 @@ import React from 'react'
 
 function useUser() {
 
-    const [user, setUser] = React.useState<_User|null>(null)
-    
+    const [user, setUser] = React.useState<_User | null>(null)
+
     React.useEffect(() => {
         (async () => {
             const user = await isAuthenticatedOrRedirect(true)
@@ -15,7 +15,7 @@ function useUser() {
             setUser(user)
         })()
     }, [])
-  return user
+    return user
 }
 
 export default useUser

@@ -1,5 +1,6 @@
 "use client"
 
+import { getCookie } from "@/services/cookies.action";
 import { QueryClient, QueryClientProvider, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createContext, useContext } from "react";
 
@@ -19,7 +20,7 @@ type GetDataParams = {
 
 type ContextType = {
     onMutate: <T>(p: RequestOptions) => Promise<T | null>
-    getData: <T>({endpoint}:GetDataParams) => Promise<T>
+    getData: <T>({ endpoint }: GetDataParams) => Promise<T>
 };
 
 const context = createContext({} as ContextType);
@@ -51,32 +52,36 @@ const InnerQueryContextProvider = ({ children }: PropsType) => {
 
     const handlePost = async (params: RequestOptions): Promise<any | null> => {
         const { contentType = "application/json", method = "POST", body, endpoint } = params;
-    
+
         try {
+            const token = await getCookie("auth_token",)
             const response = await fetch(BAKEND_URL + endpoint, {
-                headers: contentType === "multipart/form-data" ? {} : {
+                headers: contentType === "multipart/form-data" ? {
+                    "Authorization": "Bearer " + token
+                } : {
                     "Content-Type": contentType,
+                    "Authorization": "Bearer " + token
                 },
                 method,
                 credentials: "include",
                 body: contentType === "application/json" ? JSON.stringify(body) : body,
             });
-    
+
             const result: any = await response.json();
             return { ...result, status_code: response.status };
-    
+
         } catch (e) {
             console.error(e);
             return null;
         }
     };
 
-    const getData = async ({endpoint}:GetDataParams) => {
-        try{
-            const response = await fetch(URL+endpoint,{credentials: "include"})
+    const getData = async ({ endpoint }: GetDataParams) => {
+        try {
+            const response = await fetch(URL + endpoint, { credentials: "include" })
             const result = await response.json();
             return result
-        }catch(err){
+        } catch (err) {
             return null
         }
     }

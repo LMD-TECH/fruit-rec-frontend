@@ -9,18 +9,21 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useCustomQuery } from "@/context/querycontext"
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = React.useState("")
   const [isLoading, setIsLoading] = React.useState(false)
+  const { onMutate } = useCustomQuery()
   const [isSubmitted, setIsSubmitted] = React.useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
-    // Simulation d'un appel API
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    const response = await onMutate<{ error_message: string, email_infos: any, status: boolean, status_code: number }>({ endpoint: "/api/auth/forgot-password", body: { email } })
+
+    console.log(response)
 
     setIsLoading(false)
     setIsSubmitted(true)
@@ -68,7 +71,7 @@ export function ForgotPasswordForm() {
                 </div>
               </CardContent>
               <CardFooter className="flex flex-col gap-4 py-4">
-                <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                <Button type="submit" className="w-full cursor-pointer" size="lg" disabled={isLoading}>
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -115,7 +118,7 @@ export function ForgotPasswordForm() {
                 <p>
                   Si vous ne voyez pas l'e-mail, vérifiez votre dossier spam ou {" "}
                   <button
-                    className="text-primary underline-offset-4 hover:underline"
+                    className="text-primary underline-offset-4 hover:underline cursor-pointer"
                     onClick={handleSubmit}
                     disabled={isLoading}
                   >
