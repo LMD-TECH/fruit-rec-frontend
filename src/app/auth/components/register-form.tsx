@@ -13,24 +13,61 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
+import { useToast } from "@/components/ui/use-toast"
 import React from "react"
 import { Camera, Loader2, Save, Send } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { QueryClient, useMutation } from "@tanstack/react-query"
+import { _User } from "@/types/user.zod"
+import { title } from "process"
+import { useRouter } from "next/navigation"
+import { useCustomQuery } from "@/context/querycontext"
+import { createCookies } from "@/services/cookies.action"
+import { toast } from "sonner"
+
+type CreateUserResponse = {
+    message: string,
+    status_code: number
+    error?: string
+    email?: {
+        "to": string,
+        "is_sent": boolean,
+        error_message?: string
+    }
+}
 
 export function RegisterForm({
     className,
     ...props
 }: React.ComponentPropsWithoutRef<"div">) {
+
     const [isLoading, setIsLoading] = React.useState(false)
     const fileInputRef = React.useRef<HTMLInputElement>(null)
+    const formRef = React.useRef<HTMLFormElement>(null)
+    const { onMutate } = useCustomQuery()
+    const router = useRouter()
     const [avatarUrl, setAvatarUrl] = React.useState("/placeholder-user.jpg")
 
-    const handleSave = async () => {
+    const handleSave = async (formData: FormData) => {
+
         setIsLoading(true)
-        // Simuler un appel API
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        const response = await onMutate<CreateUserResponse>({ body: formData, contentType: "multipart/form-data", endpoint: "/api/auth/register" })
+        if (response && response.status_code === 200) {
+            router.replace("/auth/login")
+            toast(response.message,);
+        } else {
+            toast("Une erreur s'est produite !", {
+                description: response?.error,
+                style: {
+                    backgroundColor: "red",
+                    color: "white"
+                }
+            })
+        }
+        console.log("La reponse du server back", response)
         setIsLoading(false)
     }
+
     const handleAvatarClick = () => {
         fileInputRef.current?.click()
     }
@@ -44,7 +81,11 @@ export function RegisterForm({
     }
     return (
         <div >
-            <form onSubmit={(e) => e.preventDefault()}>
+            <form onSubmit={async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                await handleSave(formData);
+            }}>
                 <Card className="py-6  ">
                     <CardHeader className="text-center">
                         <CardTitle className="text-xl">Création de ton compte</CardTitle>
@@ -65,7 +106,7 @@ export function RegisterForm({
                                 >
                                     <Camera className="h-6 w-6 text-white" />
                                 </div>
-                                <Input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
+                                <Input ref={fileInputRef} type="file" name="photo_profile" className="hidden" accept="image/*" onChange={handleFileChange} />
                             </div>
                             <div className="space-y-1">
                                 <h3 className="font-medium">Téléverser une nouvelle photo</h3>
@@ -75,22 +116,22 @@ export function RegisterForm({
                         <div className="grid gap-4 md:grid-cols-2">
                             <div className="space-y-2">
                                 <Label htmlFor="lastName">Nom de famille</Label>
-                                <Input id="lastName" placeholder="Entrez votre nom de famille" />
+                                <Input id="lastName" name="nom_famille" placeholder="Entrez votre nom de famille" />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="firstName">Prénom</Label>
-                                <Input id="firstName" placeholder="Entrez votre prénom" />
+                                <Input id="firstName" name="prenom" placeholder="Entrez votre prénom" />
                             </div>
                         </div>
                         <div className="grid gap-4 md:grid-cols-2">
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
-                                <Input id="email" type="email" placeholder="Entrez votre email" />
+                                <Input id="email" type="email" name="email" placeholder="Entrez votre email" />
                             </div>
 
                             <div className="space-y-2">
                                 <Label htmlFor="phone">Numéro de téléphone</Label>
-                                <Input id="phone" type="tel" placeholder="Entrez votre numéro de téléphone" />
+                                <Input id="phone" type="tel" name="numero_telephone" placeholder="Entrez votre numéro de téléphone" />
                             </div>
 
                         </div>
@@ -102,7 +143,7 @@ export function RegisterForm({
 
                             <div className="space-y-2">
                                 <Label htmlFor="confirm-password">Confirmation le mot de passe</Label>
-                                <Input id="confirm-password" type="password" required />
+                                <Input id="confirm-password" name="mot_de_passe" type="password" required />
                             </div>
 
                         </div>
@@ -110,7 +151,7 @@ export function RegisterForm({
 
 
 
-                        <Button className="cursor-pointer w-full" onClick={handleSave} disabled={isLoading}>
+                        <Button className="cursor-pointer w-full" type="submit" disabled={isLoading}>
                             {isLoading ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

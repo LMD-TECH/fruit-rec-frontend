@@ -4,13 +4,15 @@ import * as React from "react"
 import { motion } from "framer-motion"
 import { ArrowLeft, Eye, EyeOff, KeyRound, Loader2, ShieldCheck } from "lucide-react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
+import { useCustomQuery } from "@/context/querycontext"
+import { toast } from "sonner"
 
 interface PasswordStrength {
   score: number
@@ -53,24 +55,34 @@ export function ResetPasswordForm() {
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
   const [password, setPassword] = React.useState("")
   const [confirmPassword, setConfirmPassword] = React.useState("")
+  const { onMutate } = useCustomQuery()
+  const params = useSearchParams()
+  const token = params.get("token")
   const router = useRouter()
 
   const passwordStrength = checkPasswordStrength(password)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (password !== confirmPassword) return
+
+    if (password !== confirmPassword) {
+      toast("Les mots de passe ne correspondent pas.", { style: { backgroundColor: "red", color: "white" } })
+      return
+    }
 
     setIsLoading(true)
-    // Simuler un appel API
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    setIsLoading(false)
-    setIsSubmitted(true)
+    const response = await onMutate<{ status: boolean, status_code: number }>({ endpoint: `/api/auth/reset-password/${token}`, body: { new_password: password } })
 
-    // Rediriger vers la connexion après 2 secondes
-    setTimeout(() => {
+    if (response && response.status_code === 200) {
+      toast("Votre mot de passe a bien été reinitialisé.")
+      setIsSubmitted(true)
       router.push("/auth/login")
-    }, 2000)
+    } else {
+      toast("Une erreur s'est produite lors de la reinitilisation du compte.", { style: { backgroundColor: "red", color: "white" } })
+    }
+
+    setIsLoading(false)
+
   }
 
   const togglePasswordVisibility = () => {
@@ -180,7 +192,7 @@ export function ResetPasswordForm() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4 py-6">
-            <Button type="submit" className="w-full" size="lg" disabled={isLoading || password !== confirmPassword}>
+            <Button type="submit" className="w-full cursor-pointer" size="lg" disabled={isLoading || password !== confirmPassword}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -1,25 +1,71 @@
-"use client"
-
+"use client";
 import * as React from "react"
 import { motion } from "framer-motion"
-import { AlertCircle, Key, Loader2, Shield, Smartphone } from "lucide-react"
+import { AlertCircle, Key, Loader2, Smartphone } from "lucide-react";
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { toast } from "sonner"
+import { useCustomQuery } from "@/context/querycontext"
+import { _User } from "@/types/user.zod"
+
+const passwordDefaultValues = {
+  nouveau_de_passe: "",
+  mot_de_passe_actuel: "",
+  confirm_new_password: ""
+}
 
 export function SecuritySettings() {
   const [isLoading, setIsLoading] = React.useState(false)
   const [showChangePassword, setShowChangePassword] = React.useState(false)
   const [twoFactorEnabled, setTwoFactorEnabled] = React.useState(false)
 
+  const { onMutate } = useCustomQuery()
+
+  const [passwordData, setPasswordData] = React.useState(passwordDefaultValues)
+
+  const handleChangePasswords = <T extends keyof typeof passwordData>(name: T, value: typeof passwordData[T]) => {
+    setPasswordData(prev => ({ ...prev, [name]: value }))
+  }
+
   const handleSave = async () => {
+
+    let isNotValid = false
+    Object.values(passwordData).forEach(val => {
+      if (val.trim() === "") {
+        isNotValid = true
+      }
+    });
+
+    if (isNotValid) {
+      toast("Mot de pass not valid !", { style: { backgroundColor: "red", color: "white" } })
+      return
+    }
+
+    if (passwordData.nouveau_de_passe !== passwordData.confirm_new_password) {
+      toast("Les nouveau password ne correspondent pas !", { style: { backgroundColor: "red", color: "white" } })
+      return
+    }
+
+    // delete passwordData.confirm_new_password
     setIsLoading(true)
-    // Simuler un appel API
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    const response = await onMutate<{ user: _User, status: boolean, error?: string }>({ endpoint: "/api/auth/update-password", body: passwordData })
+
+    if (response && response?.status) {
+      toast("Votre mot de passe a été changé avec success.")
+      setShowChangePassword(false)
+      setPasswordData(passwordDefaultValues)
+    } else {
+      toast("Une erreur s'est produite lors du changement de votre mot de passe.", {
+        style: { backgroundColor: "red", color: "white" },
+        description: response?.error
+      })
+    }
+
     setIsLoading(false)
   }
 
@@ -52,24 +98,24 @@ export function SecuritySettings() {
             >
               <div className="space-y-2">
                 <Label htmlFor="currentPassword">Mot de passe actuel</Label>
-                <Input id="currentPassword" type="password" placeholder="Entrez votre mot de passe actuel" />
+                <Input id="currentPassword" type="password" value={passwordData.mot_de_passe_actuel} onChange={(e) => handleChangePasswords("mot_de_passe_actuel", e.target.value)} placeholder="Entrez votre mot de passe actuel" />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="newPassword">Nouveau mot de passe</Label>
-                <Input id="newPassword" type="password" placeholder="Entrez votre nouveau mot de passe" />
+                <Input id="newPassword" value={passwordData.nouveau_de_passe} onChange={(e) => handleChangePasswords("nouveau_de_passe", e.target.value)} type="password" placeholder="Entrez votre nouveau mot de passe" />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirmez le nouveau mot de passe</Label>
-                <Input id="confirmPassword" type="password" placeholder="Confirmez votre nouveau mot de passe" />
+                <Input id="confirmPassword" type="password" onChange={(e) => handleChangePasswords("confirm_new_password", e.target.value)} value={passwordData.confirm_new_password} placeholder="Confirmez votre nouveau mot de passe" />
               </div>
 
               <div className="flex items-center gap-2">
                 <Button variant="outline" onClick={() => setShowChangePassword(false)}>
                   Annuler
                 </Button>
-                <Button onClick={handleSave} disabled={isLoading}>
+                <Button onClick={handleSave} disabled={isLoading} className="cursor-pointer">
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />

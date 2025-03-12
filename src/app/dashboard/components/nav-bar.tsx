@@ -1,22 +1,19 @@
-"use client"
-
+"use client";
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { ChevronRight, Search, Bell, Settings, Home, LucideHome, HomeIcon, LogOut, LogOutIcon } from "lucide-react"
+import { ChevronRight, Search, Settings, Home, LogOutIcon } from "lucide-react";
 
-import { cn } from "@/lib/utils"
+import { cn, getFirstAndLastChar } from "@/lib/utils";
 import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
-    DropdownMenuShortcut,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
     CommandDialog,
     CommandEmpty,
@@ -27,8 +24,10 @@ import {
     CommandSeparator,
 } from "@/components/ui/command"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { _User } from "@/types/user.zod"
+import useUser from "@/hooks/use-user"
+import { deleteCookie } from "@/services/cookies.action"
 
 interface BreadcrumbItem {
     label: string
@@ -41,19 +40,20 @@ const getBreadcrumbs = (pathname: string): BreadcrumbItem[] => {
         const href = `/${paths.slice(0, index + 1).join("/")}`
         const label = path.charAt(0).toUpperCase() + path.slice(1).replace(/-/g, " ")
         return { label, href }
-    })
+    });
 }
 
 export function Navbar() {
     const pathname = usePathname()
-    const [open, setOpen] = React.useState(false)
+    const [open, setOpen] = React.useState<boolean>(false)
     const breadcrumbs = getBreadcrumbs(pathname)
+    const user = useUser()
 
     React.useEffect(() => {
         const down = (e: KeyboardEvent) => {
             if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
                 e.preventDefault()
-                setOpen((open) => !open)
+                setOpen((open: boolean) => !open)
             }
         }
         document.addEventListener("keydown", down)
@@ -120,15 +120,15 @@ export function Navbar() {
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" className="relative h-9 w-9 rounded-full mr-5 cursor-pointer">
                                     <Avatar className="h-9 w-9 bg-primary/10 hover:bg-primary/15 transition-colors">
-                                        <AvatarFallback className="bg-transparent text-primary font-medium">LG</AvatarFallback>
+                                        <AvatarFallback className="bg-transparent text-primary font-medium">{getFirstAndLastChar(user)}</AvatarFallback>
                                     </Avatar>
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="w-56" align="end" forceMount>
                                 <DropdownMenuLabel className="font-normal">
                                     <div className="flex flex-col space-y-1">
-                                        <p className="text-sm font-medium leading-none">Lucas GNACADJA</p>
-                                        <p className="text-xs leading-none text-muted-foreground">l.gnacadja@example.com</p>
+                                        <p className="text-sm font-medium leading-none">{`${user?.prenom} ${user?.nom_famille}`}</p>
+                                        <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
                                     </div>
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator />
@@ -144,9 +144,9 @@ export function Navbar() {
                                 </DropdownMenuGroup> */}
                                 {/* <DropdownMenuSeparator /> */}
                                 <DropdownMenuItem asChild className="text-destructive cursor-pointer">
-                                    <Link href={"/auth/login"}> <LogOutIcon className="text-destructive" />
+                                    <Button variant={"outline"} onClick={async () => await deleteCookie("auth_token")}> <LogOutIcon className="text-destructive" />
                                         Déconnexion
-                                    </Link>
+                                    </Button>
                                     {/* <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut> */}
                                 </DropdownMenuItem>
                             </DropdownMenuContent>

@@ -1,31 +1,19 @@
 import { AppSidebar } from "@/components/app-sidebar"
-import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
-import {
-    SidebarInset,
-    SidebarProvider,
-    SidebarTrigger,
-} from "@/components/ui/sidebar"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { LogOut } from "lucide-react"
-import Link from "next/link"
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { Navbar } from "./components/nav-bar"
+import { isAuthenticatedOrRedirect } from "@/services/session.action"
 
+const URL = "http://127.0.0.1:8000/"
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
+
+    await isAuthenticatedOrRedirect()
+
+
     return (
         <SidebarProvider>
             <AppSidebar />
