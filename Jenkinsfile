@@ -1,35 +1,47 @@
 pipeline {
-    agent any  
-
-    environment {
-        // Définition des variables d'environnement
-        REPO_URL = 'https://github.com/lumeida-tech/fruit-rec-frontend.git'
-    }
+    agent any
 
     stages {
-        stage('Cloner le code') {
+        stage('Checkout') {
             steps {
-                git REPO_URL
+                git branch: 'main', url: 'https://github.com/LMD-TECH/fruit-rec-frontend.git'
             }
         }
-
-        stage('Exécuter les tests') {
+        stage('Build') {
             steps {
-                bat 'pytest tests/'  // Adapter selon ton framework de test
+                echo 'Building...'
+            }
+        }
+        stage('Test') {
+            steps {
+                echo 'Testing...'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Deploying...'
             }
         }
     }
 
     post {
         success {
-            mail to: 'kfgomina@gmail.com',
-                 subject: 'Pipeline réussi 🎉',
-                 body: 'Les étapes du pipeline ont été exécutées avec succès !'
+            emailext(
+                subject: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                body: """<p>SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+                         <p>Check console output at <a href="${env.BUILD_URL}">${env.JOB_NAME} [${env.BUILD_NUMBER}]</a></p>""",
+                to: 'fruit-rec-app@codeangel.pro',
+                mimeType: 'text/html'
+            )
         }
         failure {
-            mail to: 'kfgomina@gmail.com',
-                 subject: 'Échec du pipeline ❌',
-                 body: 'Le pipeline Jenkins a échoué. Vérifiez les logs.'
+            emailext(
+                subject: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                body: """<p>FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+                         <p>Check console output at <a href="${env.BUILD_URL}">${env.JOB_NAME} [${env.BUILD_NUMBER}]</a></p>""",
+                to: 'fruit-rec-app@codeangel.pro',
+                mimeType: 'text/html'
+            )
         }
     }
 }
