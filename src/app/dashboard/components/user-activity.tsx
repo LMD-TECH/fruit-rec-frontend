@@ -9,6 +9,10 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AnalysisDetailsDialog } from "./analysis-details-dialog"
+import { handleRequest } from "@/lib/utils"
+import { useQuery } from "@tanstack/react-query"
+import { useCustomQuery } from "@/context/querycontext"
+import { Activity } from "@/types/activity"
 
 // Générateur de données fictives
 const generateMockData = () => {
@@ -68,58 +72,65 @@ const StatCard = ({
 const TimelineItem = ({
   activity,
   setSelectedActivity,
-}: { activity: any; setSelectedActivity: React.Dispatch<React.SetStateAction<any>> }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    className="relative flex gap-4 pb-8 last:pb-0"
-  >
-    <div className="flex flex-col items-center">
-      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-        <ImageIcon className="h-5 w-5 text-primary" />
-      </div>
-      <div className="flex-1 w-px bg-border mt-2" />
-    </div>
-    <div className="flex-1 space-y-3">
-      <div className="flex items-center justify-between gap-2">
-        <div>
-          <p className="font-medium">
-            {activity.uploads} {activity.uploads === 1 ? "image téléversée" : "images téléversées"}
-          </p>
-          <p className="text-sm text-muted-foreground">{format(activity.date, "d MMMM yyyy")}</p>
+}: { activity: Activity; setSelectedActivity: React.Dispatch<React.SetStateAction<any>> }) => {
+
+  const fruits = activity.images.flatMap(item => item.results);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="relative flex gap-4 pb-8 last:pb-0"
+    >
+      <div className="flex flex-col items-center">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+          <ImageIcon className="h-5 w-5 text-primary" />
         </div>
-        <Button variant="outline" size="sm" onClick={() => setSelectedActivity(activity)}>
-          Voir les détails
-        </Button>
+        <div className="flex-1 w-px bg-border mt-2" />
       </div>
-      <Card>
-        <CardContent className="p-4">
-          <div className="space-y-2">
-            <div className="text-sm font-medium">Fruits détectés :</div>
-            <div className="grid grid-cols-2 gap-2">
-              {activity.fruits.map((fruit: any, index: number) => (
-                <div key={index} className="flex items-center gap-2 rounded-md bg-muted/50 p-2">
-                  {fruit.name === "Pommes" && <Apple className="h-4 w-4 text-primary" />}
-                  {fruit.name === "Bananes" && <Banana className="h-4 w-4 text-primary" />}
-                  {fruit.name === "Oranges" && <Grape className="h-4 w-4 text-primary" />}
-                  {fruit.name === "Mangues" && <Apple className="h-4 w-4 text-primary" />}
-                  <span className="text-sm">
-                    {fruit.count} {fruit.name}
-                  </span>
-                </div>
-              ))}
-            </div>
+      <div className="flex-1 space-y-3">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <p className="font-medium">
+              {activity.nbre_total_img} {activity.nbre_total_img === 1 ? "image téléversée" : "images téléversées"}
+            </p>
+            <p className="text-sm text-muted-foreground">{format(activity.date_televersement, "d MMMM yyyy")}</p>
           </div>
-        </CardContent>
-      </Card>
-    </div>
-  </motion.div>
-)
+          <Button variant="outline" size="sm" onClick={() => setSelectedActivity(activity)}>
+            Voir les détails
+          </Button>
+        </div>
+        <Card>
+          <CardContent className="p-4">
+            <div className="space-y-2">
+              <div className="text-sm font-medium">Fruits détectés :</div>
+              <div className="grid grid-cols-2 gap-2">
+                {fruits.map((fruit, index: number) => (
+                  <div key={index} className="flex items-center gap-2 rounded-md bg-muted/50 p-2">
+                    {/* {fruit.fruit_name === "Pommes" && <Apple className="h-4 w-4 text-primary" />}
+                    {fruit.fruit_name === "Bananes" && <Banana className="h-4 w-4 text-primary" />}
+                    {fruit.fruit_name === "Oranges" && <Grape className="h-4 w-4 text-primary" />}
+                    {fruit.fruit_name === "Mangues" && <Apple className="h-4 w-4 text-primary" />} */}
+                    <Grape className="h-4 w-4 text-primary" />
+                    <span className="text-sm">
+                      {fruit.quantity} {fruit.fruit_name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </motion.div>)
+}
 
 export function UserActivity() {
   const [isLoading, setIsLoading] = React.useState(true)
   const [timeRange, setTimeRange] = React.useState("30")
-  const [selectedActivity, setSelectedActivity] = React.useState<any>(null)
+  const [selectedActivity, setSelectedActivity] = React.useState<Activity | null>(null)
+  const { getData } = useCustomQuery()
+  const { data: activities, isLoading: i, error } = useQuery<Activity[]>({ queryFn: () => getData({ endpoint: "/api/activities/activities" }) })
 
   React.useEffect(() => {
     // Simuler l'état de chargement
@@ -187,13 +198,13 @@ export function UserActivity() {
         </CardHeader>
         <CardContent className="pt-4">
           <div className="space-y-8">
-            {mockData
+            {activities && activities
               .filter((activity) => {
                 const days = Number.parseInt(timeRange)
-                return activity.date >= subDays(new Date(), days)
+                return new Date(activity.date_televersement) >= subDays(new Date(), days)
               })
               .map((activity) => (
-                <TimelineItem key={activity.id} activity={activity} setSelectedActivity={setSelectedActivity} />
+                <TimelineItem key={activity.id_historique} activity={activity} setSelectedActivity={setSelectedActivity} />
               ))}
           </div>
         </CardContent>

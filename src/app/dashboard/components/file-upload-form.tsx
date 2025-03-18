@@ -5,7 +5,7 @@ import { useRef, useState, useEffect, useCallback } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { CheckCircle2, ImagePlus, Loader2, Upload, X } from "lucide-react"
 
-import { cn } from "@/lib/utils"
+import { cn, handleRequest } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -23,16 +23,36 @@ interface FileWithProgress {
     previewUrl?: string
 }
 
-const analyzeImage = async (file: File): Promise<string> => {
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    const fruitAnalyses = [
-        "Détecté : 4 bananes et 2 pommes en bon état",
-        "Trouvé : 3 oranges, 2 mangues et 1 ananas",
-        "Identifié : 5 bananes mûres et 3 pommes vertes",
-        "L'analyse montre : 2 mangues et 4 kiwis",
-        "Détecté : 6 fraises fraîches et 2 citrons",
-    ];
-    return fruitAnalyses[Math.floor(Math.random() * fruitAnalyses.length)]
+type ResponseAnalysis = {
+    global_result: string;
+    images: string[]
+    result_data: {
+        img_id: string;
+        image_url: string;
+        results: {
+            quantity: string;
+            fruit_name: string;
+        }[]
+    }[]
+}
+
+const analyzeImage = async (files: File[]): Promise<ResponseAnalysis | null> => {
+    // await new Promise((resolve) => setTimeout(resolve, 1000))
+    const formData = new FormData()
+    files.forEach((file) => {
+        formData.append("files", file);
+    });
+    const result = await handleRequest<ResponseAnalysis>({ endpoint: "/api/activities/create-activity", method: "POST", contentType: "multipart/form-data", body: formData })
+
+    // const fruitAnalyses = [
+    //     "Détecté : 4 bananes et 2 pommes en bon état",
+    //     "Trouvé : 3 oranges, 2 mangues et 1 ananas",
+    //     "Identifié : 5 bananes mûres et 3 pommes vertes",
+    //     "L'analyse montre : 2 mangues et 4 kiwis",
+    //     "Détecté : 6 fraises fraîches et 2 citrons",
+    // ];
+    if (result?.statusCode !== 201) return null
+    return result?.data
 }
 
 export function FileUploadForm() {
@@ -119,33 +139,40 @@ export function FileUploadForm() {
         setFileStatus("uploading")
 
         const updatedFiles = [...files]
-        for (let i = 0; i < updatedFiles.length; i++) {
-            const fileData = updatedFiles[i]
-            if (fileData.status !== "success") {
-                fileData.status = "uploading"
+        // for (let i = 0; i < updatedFiles.length; i++) {
+        //     const fileData = updatedFiles[i]
+        //     if (fileData.status !== "success") {
+        //         fileData.status = "uploading"
 
-                for (let progress = 0; progress <= 100; progress += 10) {
-                    fileData.progress = progress
-                    setFiles([...updatedFiles])
-                    await new Promise((resolve) => setTimeout(resolve, 200))
-                }
+        //         for (let progress = 0; progress <= 100; progress += 10) {
+        //             fileData.progress = progress
+        //             setFiles([...updatedFiles])
 
-                if (fileData.file.type.startsWith("image/")) {
-                    fileData.analysis = await analyzeImage(fileData.file)
-                }
+        //             await new Promise((resolve) => setTimeout(resolve, 200))
+        //         }
 
-                fileData.status = "success"
-                setFiles([...updatedFiles])
-            }
-        }
+        //         if (fileData.file.type.startsWith("image/")) {
+        //             const result = await analyzeImage(fileData.file)
+        //             fileData.analysis = result?.global_result ?? "Error"
+        //             fileData.previewUrl = result?.images[0];
+        //         }
 
+        //         fileData.status = "success"
+        //         setFiles([...updatedFiles])
+        //     }
+        // }
+        const filesData = updatedFiles.map(file => file.file)
+        const result = await analyzeImage(filesData)
         setFileStatus("success")
 
-        const analyses = files
-            .filter((f) => f.analysis)
-            .map((f) => f.analysis)
-            .join("\n\n")
-        setDescription(analyses)
+        // const analyses = files
+        //     .filter((f) => f.analysis)
+        //     .map((f) => f.analysis)
+        //     .join("\n\n")
+
+        // setDescription(analyses)
+
+        setDescription(result?.global_result || "Error")
     }
 
     const handleReset = useCallback(() => {
@@ -192,7 +219,7 @@ export function FileUploadForm() {
     }
 
     const renderPreview = (fileData: FileWithProgress, showPlaceholder: boolean = false) => {
-
+        console.log("renderPreview", fileData.previewUrl)
         if (showPlaceholder) {
             return (<img
                 src="/placeholder.svg"

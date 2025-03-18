@@ -78,7 +78,8 @@ const InnerQueryContextProvider = ({ children }: PropsType) => {
 
     const getData = async ({ endpoint }: GetDataParams) => {
         try {
-            const response = await fetch(BAKEND_URL + endpoint, { credentials: "include" })
+            const token = await getCookie("auth_token")
+            const response = await fetch(BAKEND_URL + endpoint, { credentials: "include", headers: { Authorization: "Bearer " + token } })
             const result = await response.json();
             return result
         } catch (err) {
