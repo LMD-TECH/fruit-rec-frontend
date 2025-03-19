@@ -1,17 +1,14 @@
-FROM python:3.12-slim
-
-# Set working directory
+# Étape 1 : Définir le répertoire de travail
 WORKDIR /app
 
-# Install dependencies
-#COPY requirements.txt /app/
-#RUN pip install --no-cache-dir -r requirements.txt
+# Étape 2 : Copier les fichiers de dépendances
+COPY package.json pnpm-lock.yaml ./
 
-# Copy the application
-COPY .   /app/
+# Étape 4 : Copier le reste du code source
+COPY . .
 
-# Expose the FastAPI port
-EXPOSE 8000
+# Étape 7 : Exposer le port 3000 (port par défaut de Next.js)
+EXPOSE 3000
 
-# Start the FastAPI app
-CMD ["fastapi", "run", "app.py"]
+# Étape 8 : Démarrer l'application
+CMD ["pnpm", "start"]
