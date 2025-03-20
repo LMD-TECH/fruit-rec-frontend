@@ -126,25 +126,15 @@ const TimelineItem = ({
 }
 
 export function UserActivity() {
-  const [isLoading, setIsLoading] = React.useState(true)
   const [timeRange, setTimeRange] = React.useState("30")
   const [selectedActivity, setSelectedActivity] = React.useState<Historique | null>(null)
   const { getData } = useCustomQuery()
-  const { data: activity, isLoading: i, error } = useQuery<Activity>({ queryFn: () => getData({ endpoint: "/api/activities/activities" }) })
+  const { data: activity, isLoading, error } = useQuery<Activity>({ queryFn: () => getData({ endpoint: "/api/activities/activities" }) })
 
   let historiques: Historique[] = []
   if (activity) {
     historiques = activity.histories
   }
-
-  React.useEffect(() => {
-    // Simuler l'état de chargement
-    const timer = setTimeout(() => {
-      setIsLoading(false)
-    }, 1000)
-
-    return () => clearTimeout(timer)
-  }, [])
 
   const totalUploads = mockData.reduce((acc, curr) => acc + curr.uploads, 0)
   const totalFruits = mockData.reduce((acc, curr) => acc + curr.totalFruits, 0)
