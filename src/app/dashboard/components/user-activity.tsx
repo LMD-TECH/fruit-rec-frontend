@@ -12,7 +12,7 @@ import { AnalysisDetailsDialog } from "./analysis-details-dialog"
 import { handleRequest } from "@/lib/utils"
 import { useQuery } from "@tanstack/react-query"
 import { useCustomQuery } from "@/context/querycontext"
-import { Activity } from "@/types/activity"
+import { Activity, Historique } from "@/types/activity"
 
 // Générateur de données fictives
 const generateMockData = () => {
@@ -72,9 +72,9 @@ const StatCard = ({
 const TimelineItem = ({
   activity,
   setSelectedActivity,
-}: { activity: Activity; setSelectedActivity: React.Dispatch<React.SetStateAction<any>> }) => {
+}: { activity: Historique; setSelectedActivity: React.Dispatch<React.SetStateAction<any>> }) => {
 
-  const fruits = activity.images.flatMap(item => item.results);
+  const fruits = activity.images.flatMap(item => item.fruits);
 
   return (
     <motion.div
@@ -128,9 +128,14 @@ const TimelineItem = ({
 export function UserActivity() {
   const [isLoading, setIsLoading] = React.useState(true)
   const [timeRange, setTimeRange] = React.useState("30")
-  const [selectedActivity, setSelectedActivity] = React.useState<Activity | null>(null)
+  const [selectedActivity, setSelectedActivity] = React.useState<Historique | null>(null)
   const { getData } = useCustomQuery()
-  const { data: activities, isLoading: i, error } = useQuery<Activity[]>({ queryFn: () => getData({ endpoint: "/api/activities/activities" }) })
+  const { data: activity, isLoading: i, error } = useQuery<Activity>({ queryFn: () => getData({ endpoint: "/api/activities/activities" }) })
+
+  let historiques: Historique[] = []
+  if (activity) {
+    historiques = activity.histories
+  }
 
   React.useEffect(() => {
     // Simuler l'état de chargement
@@ -162,19 +167,19 @@ export function UserActivity() {
       <div className="grid gap-4 md:grid-cols-3">
         <StatCard
           title="Total des images"
-          value={totalUploads}
+          value={activity?.stats.total_images ?? "Non trouvé !"}
           icon={ImageIcon}
           description="Images téléversées au cours des 30 derniers jours"
         />
         <StatCard
           title="Total des fruits détectés"
-          value={totalFruits}
+          value={activity?.stats.total_fruits ?? "Non trouvé !"}
           icon={Apple}
           description="Fruits identifiés sur toutes les images"
         />
         <StatCard
           title="Moyenne de fruits par image"
-          value={averageFruitsPerImage}
+          value={activity?.stats.moyenne_fruits_images ?? "Non trouvé !"}
           icon={BarChart3}
           description="Nombre moyen de fruits détectés par image"
         />
@@ -198,7 +203,7 @@ export function UserActivity() {
         </CardHeader>
         <CardContent className="pt-4">
           <div className="space-y-8">
-            {activities && activities
+            {historiques && historiques
               .filter((activity) => {
                 const days = Number.parseInt(timeRange)
                 return new Date(activity.date_televersement) >= subDays(new Date(), days)

@@ -8,10 +8,10 @@ import { Apple, Banana, Grape, ImageIcon, X, ZoomIn } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Activity, ImageData } from "@/types/activity"
+import { Activity, Historique, ImageData } from "@/types/activity"
 
 interface AnalysisDetailsProps {
-    activity: Activity | null
+    activity: Historique | null
     open: boolean
     onOpenChange: (open: boolean) => void
 }
@@ -104,7 +104,7 @@ export function AnalysisDetailsDialog({ activity, open, onOpenChange }: Analysis
                                         <div className="space-y-2">
                                             <h4 className="text-sm font-medium">Fruits détectés :</h4>
                                             <div className="grid grid-cols-2 gap-3">
-                                                {selectedImage.results?.map((fruit: any, index: number) => (
+                                                {selectedImage.fruits?.map((fruit: any, index: number) => (
                                                     <div key={index} className="flex items-center gap-2 rounded-md bg-muted/50 p-3">
                                                         {fruit.fruit_name === "Pommes" && <Apple className="h-4 w-4 text-primary" />}
                                                         {fruit.name === "Bananes" && <Banana className="h-4 w-4 text-primary" />}
@@ -122,7 +122,7 @@ export function AnalysisDetailsDialog({ activity, open, onOpenChange }: Analysis
                                             <h4 className="text-sm font-medium">Résumé de l'analyse</h4>
                                             <div className="rounded-md bg-muted/30 p-4">
                                                 <p className="text-sm">
-                                                    Un total de {selectedImage.results.length} fruits
+                                                    Un total de {selectedImage.fruits.length} fruits
                                                     détectés dans cette image. L'analyse montre une diversité de fruits avec une bonne confiance de
                                                     détection.
                                                 </p>

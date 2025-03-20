@@ -6,14 +6,25 @@ export type FruitResult = {
 export type ImageData = {
   img_id: string;
   image_url: string;
-  results: FruitResult[];
+  fruits: FruitResult[];
 };
 
-export type Activity = {
+export type Historique = {
   id_historique: string;
   description: string;
   nbre_total_img: number;
   date_televersement: string;
   id_utilisateur: string;
   images: ImageData[];
+};
+
+export type Statistique = {
+  total_images: number;
+  total_fruits: number;
+  moyenne_fruits_images: number;
+};
+
+export type Activity = {
+  histories: Historique[];
+  stats: Statistique;
 };

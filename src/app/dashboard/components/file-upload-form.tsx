@@ -164,14 +164,18 @@ export function FileUploadForm() {
         const filesData = updatedFiles.map(file => file.file)
         const result = await analyzeImage(filesData)
         setFileStatus("success")
-
+        const les_resultats = result?.result_data
+        const newUpdatedFiles = [...updatedFiles].map((file, index) => {
+            file.previewUrl = les_resultats?.[index].image_url
+            return file
+        })
         // const analyses = files
         //     .filter((f) => f.analysis)
         //     .map((f) => f.analysis)
         //     .join("\n\n")
 
         // setDescription(analyses)
-
+        setFiles(newUpdatedFiles)
         setDescription(result?.global_result || "Error")
     }
 
@@ -220,13 +224,13 @@ export function FileUploadForm() {
 
     const renderPreview = (fileData: FileWithProgress, showPlaceholder: boolean = false) => {
         console.log("renderPreview", fileData.previewUrl)
-        if (showPlaceholder) {
-            return (<img
-                src="/placeholder.svg"
-                alt='Image'
-                className="w-full h-full object-cover"
-            />)
-        }
+        // if (showPlaceholder) {
+        //     return (<img
+        //         src="/placeholder.svg"
+        //         alt='Image'
+        //         className="w-full h-full object-cover"
+        //     />)
+        // }
         return (<img
             src={fileData.previewUrl || "/placeholder.svg"}
             alt={`Preview of ${fileData.file.name}`}
