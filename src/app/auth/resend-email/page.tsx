@@ -1,9 +1,9 @@
-import { Apple } from 'lucide-react'
-import React from 'react'
-import ValidateAccountComponent from '../components/validate-account-component'
-import { Suspense } from 'react';
+import { Apple, GalleryVerticalEnd } from "lucide-react"
 
-function page() {
+import SendEmailForm from './../components/send-email-form';
+import { Suspense } from "react";
+
+export default function LoginPage() {
     return (
         <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
             <div className="flex w-full max-w-md flex-col gap-6">
@@ -12,11 +12,9 @@ function page() {
                     <span className="text-2xl font-light" >Fruit Recongnition</span>
                 </a>
                 <Suspense>
-                    <ValidateAccountComponent />
+                    <SendEmailForm />
                 </Suspense>
             </div>
         </div>
     )
 }
-
-export default page

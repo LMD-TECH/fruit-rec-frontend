@@ -62,16 +62,26 @@ export function LoginForm({
             console.log(response)
             router.replace("/dashboard")
             toast(response.message)
-        } else {
+        } else if (response && response.status_code === 403) {
             toast(response?.message || "Une erreur s'est produite !", {
                 description: response?.error,
                 style: {
                     backgroundColor: "red",
-                    color: "white"
-                }
+                    color: "white",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.5rem"
+                },
+                action: {
+                    label: "Cliquez ici pour redemander le lien.",
+                    onClick: () => router.replace("/auth/resend-email?email="+body.email),
+                },
+            })
+        }else{
+            toast(response?.message || "Une erreur s'est produite !", {
+                description: response?.error,
             })
         }
-        console.log("La reponse du server back", response)
         setIsLoading(false)
     }
 
