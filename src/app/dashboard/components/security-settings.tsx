@@ -12,6 +12,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { toast } from "sonner"
 import { useCustomQuery } from "@/context/querycontext"
 import { _User } from "@/types/user.zod"
+import { deleteCookie } from "@/services/cookies.action";
 
 const passwordDefaultValues = {
   nouveau_de_passe: "",
@@ -57,6 +58,7 @@ export function SecuritySettings() {
 
     if (response && response?.status) {
       toast("Votre mot de passe a été changé avec success.")
+      await deleteCookie("auth_token")
       setShowChangePassword(false)
       setPasswordData(passwordDefaultValues)
     } else {

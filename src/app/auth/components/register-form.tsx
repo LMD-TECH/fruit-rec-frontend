@@ -50,6 +50,18 @@ export function RegisterForm({
 
     const handleSave = async (formData: FormData) => {
 
+        const p = formData.get("mot_de_passe") as string || ""
+        const c = formData.get("confirm_mot_de_passe") as string || ""
+        if (p.trim() !== c.trim()) {
+            toast("Les mots de passes ne correspondent pas !", {
+                style: {
+                    backgroundColor: "red",
+                    color: "white"
+                }
+            })
+            return
+        }
+
         setIsLoading(true)
         const response = await onMutate<CreateUserResponse>({ body: formData, contentType: "multipart/form-data", endpoint: "/api/auth/register" })
         if (response && response.status_code === 200) {
@@ -138,7 +150,7 @@ export function RegisterForm({
                         <div className="grid gap-4 md:grid-cols-2">
                             <div className="space-y-2">
                                 <Label htmlFor="password">Mot de passe</Label>
-                                <Input id="password" type="password" required />
+                                <Input id="password" name="confirm_mot_de_passe" type="password" required />
                             </div>
 
                             <div className="space-y-2">
