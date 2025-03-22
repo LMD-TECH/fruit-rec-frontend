@@ -44,7 +44,7 @@ pipeline {
                 }
             }
         }
-"""
+    }
         // Étape 3 : Construction de l'image Docker
         stage('Build') {
             steps {
@@ -120,4 +120,3 @@ pipeline {
             }
         }
     }
-}
