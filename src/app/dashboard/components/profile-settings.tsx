@@ -70,7 +70,6 @@ export function ProfileSettings() {
 
       if (response.status_code === 200) {
         toast(response.message)
-        await deleteCookie("auth_token")
         return
       }
 
