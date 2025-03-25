@@ -2,7 +2,7 @@
 
 import { getCookie } from "@/services/cookies.action";
 import { QueryClient, QueryClientProvider, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useState } from "react";
 
 type PropsType = {
     children: React.ReactNode
@@ -21,6 +21,10 @@ type GetDataParams = {
 type ContextType = {
     onMutate: <T>(p: RequestOptions) => Promise<T | null>
     getData: <T>({ endpoint }: GetDataParams) => Promise<T>
+
+    //  A sppr plustard
+    test: string
+    handleTest: (msg: string) => void
 };
 
 const context = createContext({} as ContextType);
@@ -42,6 +46,7 @@ const QueryContextProvider = ({ children }: PropsType) => {
 
 const InnerQueryContextProvider = ({ children }: PropsType) => {
     const queryClient = useQueryClient();
+    const [test, setTest] = useState("Hello")
 
     const mutation = useMutation({
         mutationFn: async (params: RequestOptions) => await handlePost(params),
@@ -49,6 +54,11 @@ const InnerQueryContextProvider = ({ children }: PropsType) => {
             queryClient.invalidateQueries()
         },
     })
+
+
+    const handleTest = (msg: string = "bonjour tout le monde.") => {
+        setTest(test)
+    }
 
     const handlePost = async (params: RequestOptions): Promise<any | null> => {
         const { contentType = "application/json", method = "POST", body, endpoint } = params;
@@ -87,7 +97,7 @@ const InnerQueryContextProvider = ({ children }: PropsType) => {
         }
     }
 
-    const QueryValues: ContextType = { onMutate: mutation.mutateAsync, getData };
+    const QueryValues: ContextType = { onMutate: mutation.mutateAsync, getData, handleTest, test };
 
     return (
         <context.Provider value={QueryValues}>

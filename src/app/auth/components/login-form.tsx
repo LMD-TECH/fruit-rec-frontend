@@ -74,10 +74,10 @@ export function LoginForm({
                 },
                 action: {
                     label: "Cliquez ici pour redemander le lien.",
-                    onClick: () => router.replace("/auth/resend-email?email="+body.email),
+                    onClick: () => router.replace("/auth/resend-email?email=" + body.email),
                 },
             })
-        }else{
+        } else {
             toast(response?.message || "Une erreur s'est produite !", {
                 description: response?.error,
             })
@@ -109,6 +109,7 @@ export function LoginForm({
                                     <Input
                                         id="email"
                                         type="email"
+                                        data-testid="email"
                                         name="email"
                                         placeholder="m@example.com"
                                         required
@@ -124,7 +125,7 @@ export function LoginForm({
                                             Mot de passe oublié ?
                                         </Link>
                                     </div>
-                                    <Input id="password" name="mot_de_passe" type="password" required />
+                                    <Input id="password" data-testid="password" name="mot_de_passe" type="password" required />
                                 </div >
                                 <Button className="cursor-pointer w-full" type="submit" disabled={isLoading}>
                                     {isLoading ? (
