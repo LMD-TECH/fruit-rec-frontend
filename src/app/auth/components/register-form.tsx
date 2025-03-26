@@ -128,34 +128,34 @@ export function RegisterForm({
                         <div className="grid gap-4 md:grid-cols-2">
                             <div className="space-y-2">
                                 <Label htmlFor="lastName">Nom de famille</Label>
-                                <Input id="lastName" name="nom_famille" placeholder="Entrez votre nom de famille" />
+                                <Input id="lastName" name="nom_famille" placeholder="Entrez votre nom de famille" data-testid="lastName" />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="firstName">Prénom</Label>
-                                <Input id="firstName" name="prenom" placeholder="Entrez votre prénom" />
+                                <Input id="firstName" name="prenom" placeholder="Entrez votre prénom" data-testid="firstName" />
                             </div>
                         </div>
                         <div className="grid gap-4 md:grid-cols-2">
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
-                                <Input id="email" type="email" name="email" placeholder="Entrez votre email" />
+                                <Input id="email" type="email" name="email" placeholder="Entrez votre email" data-testid="email" />
                             </div>
 
                             <div className="space-y-2">
                                 <Label htmlFor="phone">Numéro de téléphone</Label>
-                                <Input id="phone" type="tel" name="numero_telephone" placeholder="Entrez votre numéro de téléphone" />
+                                <Input id="phone" type="tel" name="numero_telephone" placeholder="Entrez votre numéro de téléphone" data-testid="phone" />
                             </div>
 
                         </div>
                         <div className="grid gap-4 md:grid-cols-2">
                             <div className="space-y-2">
                                 <Label htmlFor="password">Mot de passe</Label>
-                                <Input id="password" name="confirm_mot_de_passe" type="password" required />
+                                <Input id="password" name="confirm_mot_de_passe" type="password" required data-testid="password" />
                             </div>
 
                             <div className="space-y-2">
                                 <Label htmlFor="confirm-password">Confirmation le mot de passe</Label>
-                                <Input id="confirm-password" name="mot_de_passe" type="password" required />
+                                <Input id="confirm-password" name="mot_de_passe" type="password" required data-testid="confirm-password" />
                             </div>
 
                         </div>
