@@ -27,9 +27,8 @@ pipeline {
             steps {
                 script {
                     // Configure un environnement virtuel Python et exécute les tests
-                    
-                    echo "test en cours" 
-                    
+
+                    echo 'test en cours'
                 }
             }
         }
@@ -74,7 +73,7 @@ pipeline {
                         # Supprime le conteneur existant
                         docker rm $DOCKER_CONTAINER || true
                         # Lance un nouveau conteneur en mode détaché
-                        docker run -d --name $DOCKER_CONTAINER -p 3000:3000 $DOCKER_USERNAME/fruit-rec-api:${IMAGE_VERSION}
+                        docker run -d --name $DOCKER_CONTAINER -p 3000:3000 $DOCKER_USERNAME/fruit-rec-app:${IMAGE_VERSION}
                     """
                 }
             }
